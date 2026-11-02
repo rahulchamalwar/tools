@@ -1,0 +1,13 @@
+{
+  "name": "Open Lab Tools",
+  "short_name": "Open Lab",
+  "description": "Free online tools for everyday work.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fbfbfd",
+  "theme_color": "#1266c5",
+  "icons": [
+    { "src": "app-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
