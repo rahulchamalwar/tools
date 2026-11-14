@@ -22,8 +22,8 @@ const output = path.resolve(process.argv[3] ?? path.join(root, "cpanel-dist"));
 const ignored = new Set([".git", ".agents", ".github", "node_modules", "cpanel-dist", "scripts"]);
 const excludedFiles = new Set(["README.md", "CPANEL_DEPLOYMENT.md", "AUDIT_REPORT.md"]);
 
-if (root === output || output.startsWith(root + path.sep) === false) {
-  if (root === output) throw new Error("Output directory must differ from the source directory.");
+if (root === output) throw new Error("Output directory must differ from the source directory.");
+
 }
 for (const required of ["index.html", "robots.txt", "sitemap.xml", "assets/main.js"]) {
   const p = path.join(root, required);
@@ -216,12 +216,12 @@ ErrorDocument 404 /404.html
 await writeFile(path.join(output, ".htaccess"), htaccess);
 
 const sitemap = await readFile(path.join(output, "sitemap.xml"), "utf8");
-const sitemapUrls = [...sitemap.matchAll(/<loc>(.*?)<\\/loc>/g)].map((match) => match[1]);
+const sitemapUrls = sitemap.split("<loc>").slice(1).map((part) => part.split("</loc>")[0]);
 const missing = [];
 for (const url of sitemapUrls) {
   const pathname = new URL(url).pathname;
-  const relative = pathname.endsWith("/") ? `${pathname}index.html` : pathname;
-  try { await stat(path.join(output, relative.replace(/^\\//, ""))); }
+  const relative = pathname.split("/").filter(Boolean).join(path.sep);
+  try { await stat(path.join(output, relative, "index.html")); }
   catch { missing.push(url); }
 }
 if (missing.length) {
