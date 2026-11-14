@@ -1,0 +1,61 @@
+name: Prepare cPanel deployment artifact
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/prepare-cpanel.mjs"
+      - "index.html"
+      - "404.html"
+      - "assets/**"
+      - "tools/**"
+      - "category/**"
+      - "about/**"
+      - "contact/**"
+      - "privacy-policy/**"
+      - "terms/**"
+      - "disclaimer/**"
+      - "cookie-policy/**"
+      - "robots.txt"
+      - "sitemap.xml"
+      - "sw.js"
+      - ".github/workflows/prepare-cpanel.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-cpanel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate preparation script syntax
+        run: node --check scripts/prepare-cpanel.mjs
+
+      - name: Prepare root-domain cPanel export
+        run: node scripts/prepare-cpanel.mjs
+
+      - name: Verify deployment package
+        run: |
+          test -s cpanel-dist/index.html
+          test -s cpanel-dist/assets/main.js
+          test -s cpanel-dist/robots.txt
+          test -s cpanel-dist/sitemap.xml
+          test -s cpanel-dist/.htaccess
+          ! grep -R "rahulchamalwar.github.io/tools" cpanel-dist --include="*.html" --include="*.xml" --include="*.txt" --include="*.js"
+
+      - name: Upload cPanel deployment package
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-lab-tools-cpanel-dist
+          path: cpanel-dist/
+          if-no-files-found: error
+          retention-days: 14
